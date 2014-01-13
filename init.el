@@ -1,27 +1,20 @@
-;; Package configuration
 
-(setq package-enable-at-startup nil)
-(package-initialize)
+;; Package configuration
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
+			 ("org" . "http://orgmode.org/elpa/")))
 
 ;; Package location
 (let ((default-directory (file-name-directory (or load-file-name (buffer-file-name)))))
   (add-to-list 'load-path default-directory)
-  (add-to-list 'load-path (concat default-directory "/packages/haskell-mode"))
-  (add-to-list 'load-path (concat default-directory "/packages/auto-complete"))
-  (add-to-list 'load-path (concat default-directory "/packages/s"))
-  (add-to-list 'load-path (concat default-directory "/packages/f"))
-  (add-to-list 'load-path (concat default-directory "/packages/dash"))
-  (add-to-list 'load-path (concat default-directory "/packages/cl-lib"))
-  (add-to-list 'load-path (concat default-directory "/packages/flycheck"))
-  (add-to-list 'load-path (concat default-directory "/packages/color-theme"))
   (add-to-list 'load-path (concat default-directory "/packages/zenburn"))
-  (add-to-list 'load-path (concat default-directory "/packages/emacs-calfw"))
-  (add-to-list 'load-path (concat default-directory "/packages/mu4e"))
-  (add-to-list 'load-path (concat default-directory "/packages/edit-server")))
+  (add-to-list 'load-path (concat default-directory "/packages/mu4e")))
+
+(require 'package)
+(setq package-enable-at-startup nil)
+(package-initialize)
 
 ;; ########## Require ##########
 (require 'tramp)
@@ -48,9 +41,9 @@
 
 (setq org-agenda-include-diary t)
 (setq org-log-done t)
-(setq org-agenda-files (list "~/org/work.org"
-			     "~/org/home.org"))
-;(setq org-agenda-files (list "~/org/home.org"))
+;(setq org-agenda-files (list "~/org/work.org"
+;			     "~/org/home.org"))
+(setq org-agenda-files (list "~/org/home.org"))
 
 ;; Org RSS
 (setq org-feed-alist
@@ -209,3 +202,4 @@
 (setq ac-ignore-case t)
 (zenburn)
 (setq-default ispell-program-name "aspell") ;; fr
+
