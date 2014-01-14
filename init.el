@@ -28,6 +28,86 @@
 (require 'org-mu4e)
 (require 'org-feed)
 (require 'org-crypt)
+(require 'ox-reveal)
+(require 'google-translate)
+(require 'auto-complete)
+(require 'auto-complete-config)
+
+;; ########## AutoComplete ##########
+;; dirty fix for having AC everywhere
+(define-globalized-minor-mode real-global-auto-complete-mode
+  auto-complete-mode (lambda ()
+                       (if (not (minibufferp (current-buffer)))
+                         (auto-complete-mode 1))
+                       ))
+real-global-auto-complete-mode
+
+;; ########## Haskell ##########
+(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+;; hslint on the command line only likes this indentation mode;
+;; alternatives commented out below.
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+
+;; Ignore compiled Haskell files in filename completions
+(add-to-list 'completion-ignored-extensions ".hi")
+
+(defun flymake-haskell-init ()
+  "When flymake triggers, generates a tempfile containing the
+  contents of the current buffer, runs `hslint` on it, and
+  deletes file. Put this file path (and run `chmod a+x hslint`)
+  to enable hslint: https://gist.github.com/1241073"
+  (let* ((temp-file   (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+         (local-file  (file-relative-name
+                       temp-file
+                       (file-name-directory buffer-file-name))))
+    (list "hslint" (list local-file))))
+
+(defun flymake-haskell-enable ()
+  "Enables flymake-mode for haskell, and sets <C-c d> as command
+  to show current error."
+  (when (and buffer-file-name
+             (file-writable-p
+              (file-name-directory buffer-file-name))
+             (file-writable-p buffer-file-name))
+    (local-set-key (kbd "C-c d") 'flymake-display-err-menu-for-current-line)
+    (flymake-mode t)))
+
+;; Forces flymake to underline bad lines, instead of fully
+;; highlighting them; remove this if you prefer full highlighting.
+(custom-set-faces
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-warnline ((((class color)) (:underline "yellow")))))
+
+(require 'hs-lint)    ;; https://gist.github.com/1241059
+(require 'haskell-ac) ;; https://gist.github.com/1241063
+
+(defun my-haskell-mode-hook ()
+  "hs-lint binding, plus autocompletion and paredit."
+  (local-set-key "\C-c c" 'hs-lint)
+  (setq ac-sources
+        (append '(ac-source-yasnippet
+                  ac-source-abbrev
+                  ac-source-words-in-buffer
+                  my/ac-source-haskell)
+                ac-sources))
+  (dolist (x '(haskell literate-haskell))
+    (add-hook
+     (intern (concat (symbol-name x)
+                     "-mode-hook"))
+     'turn-on-paredit)))
+
+(eval-after-load 'haskell-mode
+  '(progn
+     (require 'flymake)
+     (push '("\\.l?hs\\'" flymake-haskell-init) flymake-allowed-file-name-masks)
+     (add-hook 'haskell-mode-hook 'flymake-haskell-enable)
+     (add-hook 'haskell-mode-hook 'my-haskell-mode-hook)))
+
+(add-hook 'haskell-mode-hook 'auto-complete-mode)
+(add-hook 'inferior-haskell-mode-hook 'turn-on-ghci-completion)
 
 ;; ########## Org-mode #########
 (org-crypt-use-before-save-magic)
@@ -111,9 +191,9 @@
 
 (setq mu4e-maildir-shortcuts
       '( ("/INBOX"               . ?i)
-         ("/[Gmail].Sent Mail"   . ?s)
-         ("/[Gmail].Trash"       . ?t)
-         ("/[Gmail].All Mail"    . ?a)))
+         ("/[Gmail].Messages envoyés"   . ?s)
+         ("/[Gmail].Corbeille"       . ?t)
+         ("/[Gmail].Tous les messages"    . ?a)))
 
 ;; allow for updating mail using 'U' in the main view:
 (setq mu4e-get-mail-command "offlineimap")
@@ -136,30 +216,6 @@
 (setq message-kill-buffer-on-exit t)
 
 ;; ########## cfw ##########
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(cfw:face-annotation ((t :foreground "RosyBrown" :inherit cfw:face-day-title)))
-;;  '(cfw:face-day-title ((t :background "grey10")))
-;;  '(cfw:face-default-content ((t :foreground "#bfebbf")))
-;;  '(cfw:face-default-day ((t :weight bold :inherit cfw:face-day-title)))
-;;  '(cfw:face-disable ((t :foreground "DarkGray" :inherit cfw:face-day-title)))
-;;  '(cfw:face-grid ((t :foreground "DarkGrey")))
-;;  '(cfw:face-header ((t (:foreground "#d0bf8f" :weight bold))))
-;;  '(cfw:face-holiday ((t :background "grey10" :foreground "#8c5353" :weight bold)))
-;;  '(cfw:face-periods ((t :foreground "cyan")))
-;;  '(cfw:face-saturday ((t :foreground "#8cd0d3" :background "grey10" :weight bold)))
-;;  '(cfw:face-select ((t :background "#2f2f2f")))
-;;  '(cfw:face-sunday ((t :foreground "#cc9393" :background "grey10" :weight bold)))
-;;  '(cfw:face-title ((t (:foreground "#f0dfaf" :weight bold :height 2.0 :inherit variable-pitch))))
-;;  '(cfw:face-today ((t :background: "grey10" :weight bold)))
-;;  '(cfw:face-today-title ((t :background "#7f9f7f" :weight bold)))
-;;  '(cfw:face-toolbar ((t :foreground "Steelblue4" :background "Steelblue4")))
-;;  '(cfw:face-toolbar-button-off ((t :foreground "Gray10" :weight bold)))
-;;  '(cfw:face-toolbar-button-on ((t :foreground "Gray50" :weight bold))))
-
 
 ;; Month
 (setq calendar-month-name-array
