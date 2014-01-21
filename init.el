@@ -1,4 +1,3 @@
-
 ;; Package configuration
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -32,9 +31,17 @@
 (require 'google-translate)
 (require 'auto-complete)
 (require 'auto-complete-config)
+(require 'edit-server)
+
+;; ########## EditServer ##########
+(edit-server-start)
 
 ;; ########## AutoComplete ##########
 ;; dirty fix for having AC everywhere
+(ac-config-default)
+(global-auto-complete-mode t)
+(auto-complete-mode t)
+
 (define-globalized-minor-mode real-global-auto-complete-mode
   auto-complete-mode (lambda ()
                        (if (not (minibufferp (current-buffer)))
@@ -258,4 +265,14 @@ real-global-auto-complete-mode
 (setq ac-ignore-case t)
 (zenburn)
 (setq-default ispell-program-name "aspell") ;; fr
+(desktop-save-mode 1)
 
+(global-set-key (kbd "C-x <up>") 'windmove-up)
+(global-set-key (kbd "C-x <down>") 'windmove-down)
+(global-set-key (kbd "C-x <right>") 'windmove-right)
+(global-set-key (kbd "C-x <left>") 'windmove-left)
+
+(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "S-C-<down>") 'shrink-window)
+(global-set-key (kbd "S-C-<up>") 'enlarge-window)
