@@ -32,6 +32,7 @@
 (require 'auto-complete)
 (require 'auto-complete-config)
 (require 'edit-server)
+(require 'undo-tree)
 
 ;; ########## EditServer ##########
 (edit-server-start)
@@ -276,3 +277,7 @@ real-global-auto-complete-mode
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
+
+(server-start)
+
+(global-undo-tree-mode 1)
